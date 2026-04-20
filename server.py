@@ -52,6 +52,7 @@ class ExtractRequest(BaseModel):
     url: str
     instruction: str
     extraction_schema: Optional[dict] = None
+    schema: Optional[dict] = None  # alias — Hermes plugin sends "schema"
     chunk_token_threshold: Optional[int] = 4000
     temperature: Optional[float] = 0.0
     max_tokens: Optional[int] = 2000
@@ -253,10 +254,11 @@ async def extract(req: ExtractRequest):
         )
         extra_args = {"temperature": req.temperature, "max_tokens": req.max_tokens}
 
-        if req.extraction_schema:
+        schema = req.extraction_schema or req.schema
+        if schema:
             llm_strategy = LLMExtractionStrategy(
                 llm_config=llm_config,
-                schema=req.extraction_schema,
+                schema=schema,
                 extraction_type="schema",
                 instruction=req.instruction,
                 chunk_token_threshold=req.chunk_token_threshold,
